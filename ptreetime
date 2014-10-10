@@ -2,7 +2,10 @@
 
 # We are like /usr/bin/time, but we dump stats per process
 
-LD_PRELOAD="$(dirname "$0")"/libdumpsched.so" ${LD_PRELOAD}"
+LD_LIBRARY_PATH="$(dirname "$(readlink -f "$0")"):${LD_LIBRARY_PATH}"
+#echo "set LD_LIBRARY_PATH to ${LD_LIBRARY_PATH}" 1>&2
+LD_PRELOAD="libdumpsched.so ${LD_PRELOAD}"
+export LD_LIBRARY_PATH
 export LD_PRELOAD
 export LIBDUMPSCHED_ONLY_PTREETIME=1
 
