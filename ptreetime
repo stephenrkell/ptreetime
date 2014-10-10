@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# We are like /usr/bin/time, but we dump stats per process
+
+LD_PRELOAD="$(dirname "$0")"/libdumpsched.so" ${LD_PRELOAD}"
+export LD_PRELOAD
+export LIBDUMPSCHED_ONLY_PTREETIME=1
+
+exec "$@"
