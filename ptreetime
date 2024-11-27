@@ -1,12 +1,25 @@
-#!/bin/sh
+#!/bin/bash
 
-# We are like /usr/bin/time, but we dump stats per process
+# We are like /usr/bin/time, but we dump stats per process in a tree
 
-LD_LIBRARY_PATH="$(dirname "$(readlink -f "$0")"):${LD_LIBRARY_PATH}"
-#echo "set LD_LIBRARY_PATH to ${LD_LIBRARY_PATH}" 1>&2
-LD_PRELOAD="libdumpsched.so ${LD_PRELOAD}"
+preload_lib_path="$(dirname "$(readlink -f "$0")")"
+LD_LIBRARY_PATH="${preload_lib_path}:${LD_LIBRARY_PATH}"
+echo "set LD_LIBRARY_PATH to ${LD_LIBRARY_PATH}" 1>&2
+LD_PRELOAD="${preload_lib_path:+${preload_lib_path}/}libdumpsched.so ${LD_PRELOAD}"
 export LD_LIBRARY_PATH
 export LD_PRELOAD
 export LIBDUMPSCHED_ONLY_PTREETIME=1
 
-exec "$@"
+case "$(basename "$0")" in
+    (ptreetime) exec "$@" ;;
+    (ptreetime-oneline)
+        "$@" 3>&2 2>&1 1>&3 | \
+        { tr '\n' '\f' | \
+        sed 's/\([[:blank:]]\)[[:blank:]]*:\([[:blank:]]\)[[:blank:]]*\([0-9\.]\+\)/\1:\t\3\n/g' | \
+        tr '\f' '\t' | sed 's/^\t//' | cut -d$'\t' -f3,1; } 3>&2 2>&1 1>&3
+        ;;
+    (ptreetime-oneline-sorted)
+        exec "$(dirname "$0")"/ptreetime-oneline "$@" 3>&2 2>&1 1>&3 | sort -t$'\t' -k2 -n -r 3>&2 2>&1 1>&3
+        ;;
+    (*) echo "Did not understand $0" 1>&2; exit 1 ;;
+esac
