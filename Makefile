@@ -1,7 +1,7 @@
 default: libdumpsched.so
 
 LIBRUNT ?= $(HOME)/work/devel/librunt.git
-CFLAGS += -I$(LIBRUNT)/include -DRELF_DEFINE_STRUCTURES
+CFLAGS += -I$(LIBRUNT)/include
 
 CFLAGS += -g
 libdumpsched.so: CFLAGS += -fPIC
